@@ -2,6 +2,13 @@
 __pycache__/
 *.py[cod]
 
+#JPEG
+*.jpg
+*.jpeg
+
+# Graphics Interchange Format
+*.gif
+
 # C extensions
 *.so
 
