@@ -5,6 +5,7 @@ __pycache__/
 #JPEG
 *.jpg
 *.jpeg
+*.png
 
 # Graphics Interchange Format
 *.gif

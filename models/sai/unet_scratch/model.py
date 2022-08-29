@@ -27,7 +27,7 @@ class unet(nn.Module):
 # model=unet([3,64,128,256,512,1024],[1024,512, 256, 128, 64],(420,260),1) 
 # device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 # model=model.to(device)
-# x    = torch.randn(2, 3,420,260)
+# x = torch.randn(2, 3,420,260)
 # x=x.to(device)
 # output=model(x)
 # print(output.shape)
