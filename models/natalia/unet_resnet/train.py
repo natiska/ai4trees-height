@@ -20,14 +20,10 @@ def read_yaml(file_path):
     with open(file_path, "r") as f:
         return yaml.safe_load(f)
 
-def access_drive():
-    # https://www.wpdisplayfiles.com/docs/how-to-generate-google-drive-client-id-client-secret-key/
-    gauth = GoogleAuth()
-    gauth.LocalWebserverAuth() # client_secrets.json need to be in the same directory as the script
-    drive = GoogleDrive(gauth)
-    return drive
-
 def make_train_test_transform(img_size, mean, std, max_pixel_value):
+    
+    img_size = tuple(img_size)
+    
     train_transform = A.Compose(
                 [A.Resize(img_size[0],img_size[1]),
                 A.Rotate(limit=35,p=1.0),
@@ -103,16 +99,17 @@ def evaluate(test_loader,model,loss_fn,device):
     model.train()
     return epoch_dice_score.item(),epoch_vloss
             
-def save_predictions_as_imgs(loader, model, device, folder="saved_images/"):
+def save_predictions_as_imgs(loader, model, device, folder="predictions"):
     model.eval()
+    if os.path.exists(folder) == False:
+        os.mkdir(folder)
     for batch_idx, (img,mask,fname) in enumerate(loader):
         img = img.to(device)
         mask= mask.float().unsqueeze(1).to(device)
         with torch.no_grad():
             preds = torch.sigmoid(model(img))
             preds = (preds > 0.5).float()
-        save_image(preds, f"{folder}/pred_{batch_idx}_{fname}.png")
-        save_image(mask, f"{folder}{batch_idx}.png")
+        save_image(preds, f"{folder}/pred_{batch_idx}_{fname[0].split('.')[0]}.png")
 
 def main(config):
 
@@ -128,17 +125,18 @@ def main(config):
                                         config["batch_size"],
                                         shuffle=True)
 
-    model = smp.Unet('resnet34', encoder_weights='imagenet', in_channels=3, classes=1,activation=None, encoder_depth=5, decoder_channels=[512, 256, 128,64,32])
+    model = smp.Unet('resnet34', encoder_weights='imagenet', in_channels=1, classes=1,activation=None, 
+                    encoder_depth=5, decoder_channels=[512, 256, 128,64,32])
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(),lr=config["learning_rate"])
 
-    train_model(config.num_epochs, train_loader, model, optimizer, loss_fn, device)
+    train_model(config["num_epochs"], train_loader, model, optimizer, loss_fn, device)
 
-    save_predictions_as_imgs(test_loader,model,device,"saved_images/")
+    save_predictions_as_imgs(test_loader,model,device,"predictions")
 
 if __name__ == '__main__':
 
     config_path = sys.argv[1]
     config = read_yaml(config_path)
-    print(config)
-    #main(config)
+    main(config)
+    print("Script finished")

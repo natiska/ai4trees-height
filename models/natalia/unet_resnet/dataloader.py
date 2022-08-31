@@ -31,7 +31,7 @@ class segDataset(Dataset):
 def get_loader(img_dir,mask_dir,train_transform,test_transform,batch_size,shuffle):
     train_dataset = segDataset(img_dir,mask_dir,train_transform)
     test_dataset = segDataset(img_dir,mask_dir,test_transform)
-    test_size=0.10
+    test_size=0.50
     seed=7777
     dataset_size = len(train_dataset)
     indices = list(range(dataset_size))
