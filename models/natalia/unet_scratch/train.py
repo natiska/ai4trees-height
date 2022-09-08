@@ -14,9 +14,6 @@ import sys
 from dataloader import *
 from model_unet import UNET
 
-from pydrive.auth import GoogleAuth
-from pydrive.drive import GoogleDrive
-
 def read_yaml(file_path):
     with open(file_path, "r") as f:
         return yaml.safe_load(f)
