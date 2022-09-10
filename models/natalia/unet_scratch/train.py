@@ -97,7 +97,7 @@ def evaluate(test_loader,model,loss_fn,device):
     model.train()
     return epoch_dice_score.item(),epoch_vloss
             
-def save_predictions_as_imgs(loader, model, device, folder="predictions"):
+def save_predictions_as_imgs(loader, model, device, folder):
     model.eval()
     if os.path.exists(folder) == False:
         os.mkdir(folder)
@@ -133,7 +133,7 @@ def main(config):
     print("Test dice score: ", test_dice_score)
     print("Test loss: ", test_loss)
 
-    save_predictions_as_imgs(test_loader,model,device,"predictions")
+    save_predictions_as_imgs(test_loader,model,device, config["save_output_path"])
 
 if __name__ == '__main__':
 
