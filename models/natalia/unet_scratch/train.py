@@ -110,7 +110,7 @@ def save_predictions_as_imgs(loader, model, device, folder):
         with torch.no_grad():
             preds = torch.sigmoid(model(img))
             preds = (preds > 0.5).float()
-        save_image(preds, f"{folder}/pred_{batch_idx}_{fname[0].split('.')[0]}.png")
+        save_image(preds, f"{folder}/pred_{fname[0].split('.')[0]}.png")
 
 def main(config):
 
