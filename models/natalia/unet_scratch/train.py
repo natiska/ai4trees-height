@@ -45,14 +45,17 @@ def make_train_test_transform(img_size, mean, std, max_pixel_value):
                 ])
     return train_transform, test_transform
 
-def train_model(num_epochs, train_loader, model, optimizer, loss_fn, device):
+def train_model(num_epochs, train_loader, valid_loader, model, optimizer, loss_fn, device):
     for epoch in range(num_epochs):
         print('EPOCH {}:'.format(epoch + 1))
         train_loss=train_one_epoch(train_loader,model,optimizer,loss_fn,device)
-        print(train_loss)
+        print("Train set loss: ", train_loss)
+        valid_dice_score, valid_loss = evaluate(valid_loader,model,loss_fn,device)
+        print("Validation set loss: ", valid_loss)
+        print("Validation set DICE score: ", valid_dice_score)
     return
     
-def train_one_epoch(train_loader,model, optimizer,loss_fn,device):
+def train_one_epoch(train_loader, model, optimizer,loss_fn,device):
     running_tloss = 0.0
     loop = tqdm(train_loader)
     model = model.to(device)
@@ -116,7 +119,7 @@ def main(config):
     train_transform, test_transform = make_train_test_transform(config["img_size"],
     config["mean"], config["std"], config["max_pixel_value"])
 
-    train_loader,test_loader=get_loader(config["img_dir"],
+    train_loader, valid_loader, test_loader=get_loader(config["img_dir"],
                                         config["mask_dir"],
                                         train_transform,
                                         test_transform,
@@ -127,7 +130,7 @@ def main(config):
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(),lr=config["learning_rate"])
 
-    train_model(config["num_epochs"], train_loader, model, optimizer, loss_fn, device)
+    train_model(config["num_epochs"], train_loader, valid_loader, model, optimizer, loss_fn, device)
 
     test_dice_score, test_loss = evaluate(test_loader,model,loss_fn,device)
     print("Test dice score: ", test_dice_score)

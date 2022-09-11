@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, Dataset , Subset
+from torch.utils.data import DataLoader, Dataset
 import os
 from PIL import Image 
 import numpy as np
@@ -29,32 +29,14 @@ class segDataset(Dataset):
        return img,mask,filename
        
 def get_loader(img_dir,mask_dir,train_transform,test_transform,batch_size,shuffle):
-    train_dataset = segDataset(img_dir,mask_dir,train_transform)
-    test_dataset = segDataset(img_dir,mask_dir,test_transform)
-    test_size=0.50
-    seed=7777
-    dataset_size = len(train_dataset)
-    indices = list(range(dataset_size))
-    split = int(np.floor(test_size * dataset_size))
-    np.random.seed(seed)
-    np.random.shuffle(indices)
-    train_indices,test_indices = indices[split:],indices[:split]
-    
-    # train_sampler = SubsetRandomSampler(train_indices)
-    # test_sampler = SubsetRandomSampler(test_indices)
-    
-    
-    # train_loader = DataLoader(train_dataset, batch_size=batch_size, 
-    #                                        sampler=train_sampler)
-    # test_loader = DataLoader(test_dataset, batch_size=batch_size,
-    #                                             sampler=test_sampler)
-    
-    train_dataset=Subset(train_dataset,train_indices)
-    test_dataset = Subset(test_dataset,test_indices)
+    train_dataset = segDataset(os.path.join(img_dir, "train"),os.path.join(mask_dir, "train"),train_transform)
+    valid_dataset = segDataset(os.path.join(img_dir, "validation"),os.path.join(mask_dir, "validation"),test_transform)
+    test_dataset = segDataset(os.path.join(img_dir, "test"),os.path.join(mask_dir, "test"),test_transform)
     
     train_loader = DataLoader(train_dataset, batch_size=batch_size,shuffle=shuffle)
+    valid_loader = DataLoader(valid_dataset, batch_size=batch_size,shuffle=shuffle)
     test_loader = DataLoader(test_dataset, batch_size=batch_size,shuffle=shuffle)
     
-    return train_loader,test_loader
+    return train_loader, valid_loader, test_loader
 
 
