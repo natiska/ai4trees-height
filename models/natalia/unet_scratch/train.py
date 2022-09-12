@@ -119,14 +119,15 @@ def main(config):
     train_transform, test_transform = make_train_test_transform(config["img_size"],
     config["mean"], config["std"], config["max_pixel_value"])
 
-    train_loader, valid_loader, test_loader=get_loader(config["img_dir"],
-                                        config["mask_dir"],
+    train_loader, valid_loader, test_loader=get_loader(config["data_dir"],
+                                        list(config["input_folders"]),
+                                        config["output_folder"],
                                         train_transform,
                                         test_transform,
                                         config["batch_size"],
                                         shuffle=True)
 
-    model = UNET(in_channels=1,out_channels=1)
+    model = UNET(in_channels=config["input_channels"],out_channels=1)
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(),lr=config["learning_rate"])
 
