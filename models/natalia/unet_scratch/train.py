@@ -124,8 +124,7 @@ def main(config):
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    train_transform, test_transform = make_train_test_transform(config["img_size"],
-    config["mean"], config["std"], config["max_pixel_value"])
+    train_transform, test_transform = make_train_test_transform(config["img_size"])
 
     train_loader, valid_loader, test_loader=get_loader(config["data_dir"],
                                         list(config["input_folders"]),

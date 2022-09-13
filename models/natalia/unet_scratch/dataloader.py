@@ -32,6 +32,7 @@ class segDataset(Dataset):
         else:
             img = np.array(Image.open(os.path.join(
                 self.data_dir, self.input_folders[0], self.image_list[index])))
+        img = img.astype(np.float32)
         mask = np.array(Image.open(os.path.join(self.data_dir, self.output_folder,
                         self.image_list[index])).convert("L"), dtype=np.float32)
         mask[mask == 255.0] = 1.0
