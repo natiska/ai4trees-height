@@ -25,6 +25,8 @@ class segDataset(Dataset):
                 array = np.array(Image.open(os.path.join(self.data_dir, folder_name, self.image_list[index])))
                 if len(array.shape) == 2:
                     array = array.reshape(array.shape[0], array.shape[1], 1)
+                if len(array.shape) == 4:
+                    array = array[:,:,:-1]
                 input_layers.append(array)
             img = np.dstack(input_layers)
         else:
