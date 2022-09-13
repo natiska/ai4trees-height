@@ -13,12 +13,13 @@ import yaml
 import sys
 from dataloader import *
 from model_unet import UNET
+import wandb
 
 def read_yaml(file_path):
     with open(file_path, "r") as f:
         return yaml.safe_load(f)
 
-def make_train_test_transform(img_size, mean, std, max_pixel_value):
+def make_train_test_transform(img_size):
     
     img_size = tuple(img_size)
     
@@ -27,20 +28,20 @@ def make_train_test_transform(img_size, mean, std, max_pixel_value):
                 A.Rotate(limit=35,p=1.0),
                 A.HorizontalFlip(p=0.5),
                 A.VerticalFlip(p=0.1),
-                A.Normalize(
-                    mean=mean,
-                    std=std,
-                    max_pixel_value=max_pixel_value
-                ),
+                #A.Normalize(
+                #    mean=mean,
+                #    std=std,
+                #    max_pixel_value=max_pixel_value
+                #),
                 ToTensorV2(),
                 ])
     test_transform = A.Compose(
                 [A.Resize(img_size[0],img_size[1]),
-                A.Normalize(
-                    mean=mean,
-                    std=std,
-                    max_pixel_value=max_pixel_value
-                ),
+                #A.Normalize(
+                #    mean=mean,
+                #    std=std,
+                #    max_pixel_value=max_pixel_value
+                #),
                 ToTensorV2(),
                 ])
     return train_transform, test_transform
@@ -50,9 +51,12 @@ def train_model(num_epochs, train_loader, valid_loader, model, optimizer, loss_f
         print('EPOCH {}:'.format(epoch + 1))
         train_loss=train_one_epoch(train_loader,model,optimizer,loss_fn,device)
         print("Train set loss: ", train_loss)
+        wandb.log({"Train set loss":train_loss})
         valid_dice_score, valid_loss = evaluate(valid_loader,model,loss_fn,device)
         print("Validation set loss: ", valid_loss)
+        wandb.log({"Validation set loss": valid_loss})
         print("Validation set DICE score: ", valid_dice_score)
+        wandb.log({"Validation set DICE score": valid_dice_score})
     return
     
 def train_one_epoch(train_loader, model, optimizer,loss_fn,device):
@@ -100,19 +104,23 @@ def evaluate(test_loader,model,loss_fn,device):
     model.train()
     return epoch_dice_score.item(),epoch_vloss
             
-def save_predictions_as_imgs(loader, model, device, folder):
+def save_predictions_as_imgs(loader, model, device, output_folder):
     model.eval()
-    if os.path.exists(folder) == False:
-        os.mkdir(folder)
+    predictions_folder = output_folder + "/predictions"
+    if os.path.exists(predictions_folder) == False:
+        os.makedirs(predictions_folder)
     for batch_idx, (img,mask,fname) in enumerate(loader):
         img = img.to(device)
         mask= mask.float().unsqueeze(1).to(device)
         with torch.no_grad():
             preds = torch.sigmoid(model(img))
             preds = (preds > 0.5).float()
-        save_image(preds, f"{folder}/pred_{fname[0].split('.')[0]}.png")
+        save_image(preds, f"{predictions_folder}/pred_{fname[0].split('.')[0]}.png")
 
 def main(config):
+
+    wandb.init(project="my-test-project")
+    wandb.config = config
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -135,9 +143,12 @@ def main(config):
 
     test_dice_score, test_loss = evaluate(test_loader,model,loss_fn,device)
     print("Test dice score: ", test_dice_score)
+    wandb.log({"Test dice score": test_dice_score})
     print("Test loss: ", test_loss)
+    wandb.log({"Test loss": test_loss})
 
     save_predictions_as_imgs(test_loader,model,device, config["save_output_path"])
+    model
 
 if __name__ == '__main__':
 

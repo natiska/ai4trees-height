@@ -3,9 +3,6 @@ data_dir: ../../../data_samples/drive_data/patches
 input_folders: ["DSM", "RGB"]
 input_channels: 4
 output_folder: "masks"
-mean: [0.485]
-std: [0.229]
-max_pixel_value: 255.0
 
 #MODEL
 batch_size: 1
