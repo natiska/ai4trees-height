@@ -98,3 +98,6 @@ target/
 
 # Google Drive API secrets
 **/client_secrets.json
+
+#Weights and Biases files
+**/wandb
