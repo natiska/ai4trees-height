@@ -23,23 +23,31 @@ class segDataset(Dataset):
             input_layers = []
             for folder_name in self.input_folders:
                 array = np.array(Image.open(os.path.join(self.data_dir, folder_name, self.image_list[index])))
-                if len(array.shape) == 2:
+                if len(array.shape) == 2: # convert (256, 256) into (256, 256, 1)
                     prev_shape = array.shape
                     array = array.reshape(array.shape[0], array.shape[1], 1)
-                if len(array.shape) == 4:
-                    array = array.flatten()
-                if (len(array.shape) == 3) and (array.shape[-1] == 4):
-                    array = array[:,:,:-1]
+                if len(array.shape) == 4: # convert [1, 4, 256, 256] into [4, 256, 256]
+                    array = array.squeeze()
+                if (len(array.shape) == 3) and (4 in list(array.shape)):
+                    channel_idx = list(array.shape).index(4)
+                    if channel_idx == 0:
+                        array = array[:-1,:,:]
+                    else:
+                        array = array[:,:,:-1]
                 input_layers.append(array)
-            img = np.dstack(input_layers)
+            array = np.dstack(input_layers)
         else:
-            img = np.array(Image.open(os.path.join(
+            array = np.array(Image.open(os.path.join(
                 self.data_dir, self.input_folders[0], self.image_list[index])))
-            if len(img.shape) == 4:
-                    img = img.flatten()
-            if (len(img.shape) == 3) and (img.shape[-1] == 4):
-                img = img[:,:,:-1]
-        img = img.astype(np.float32)
+            if len(array.shape) == 4:
+                    array = array.squeeze()
+            if (len(array.shape) == 3) and (4 in list(array.shape)):
+                    channel_idx = list(array.shape).index(4)
+                    if channel_idx == 0:
+                        array = array[:-1,:,:]
+                    else:
+                        array = array[:,:,:-1]
+        img = array.astype(np.float32)
         mask = np.array(Image.open(os.path.join(self.data_dir, self.output_folder,
                         self.image_list[index])).convert("L"), dtype=np.float32)
         mask[mask == 255.0] = 1.0
