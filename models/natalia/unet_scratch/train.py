@@ -119,7 +119,10 @@ def save_predictions_as_imgs(loader, model, device, output_folder):
 
 def main(config):
 
-    wandb.init(project="my-test-project")
+    if config["log_in_wandb"]:
+        os.environ['WANDB_DISABLED'] = 'true'
+
+    wandb.init(project="ai4trees_project")
     wandb.config = config
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -134,7 +137,7 @@ def main(config):
                                         config["batch_size"],
                                         shuffle=True)
 
-    model = UNET(in_channels=config["input_channels"],out_channels=1)
+    model = UNET(in_channels=config["input_channels"],out_channels=1, features=config["features"])
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(),lr=config["learning_rate"])
 

@@ -10,6 +10,10 @@ learning_rate: 0.001
 weight_decay: 0.0001
 num_epochs: 5
 img_size: [256,256]
+features: [64, 128, 256, 512]
 
 #OUTPUT
 save_output_path: run_output
+
+#REPORTING
+log_in_wandb: False
