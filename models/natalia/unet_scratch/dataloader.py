@@ -26,6 +26,8 @@ class segDataset(Dataset):
                 if len(array.shape) == 2:
                     prev_shape = array.shape
                     array = array.reshape(array.shape[0], array.shape[1], 1)
+                if len(array.shape) == 4:
+                    array = array.flatten()
                 if (len(array.shape) == 3) and (array.shape[-1] == 4):
                     array = array[:,:,:-1]
                 input_layers.append(array)
@@ -33,6 +35,8 @@ class segDataset(Dataset):
         else:
             img = np.array(Image.open(os.path.join(
                 self.data_dir, self.input_folders[0], self.image_list[index])))
+            if len(img.shape) == 4:
+                    img = img.flatten()
             if (len(img.shape) == 3) and (img.shape[-1] == 4):
                 img = img[:,:,:-1]
         img = img.astype(np.float32)
