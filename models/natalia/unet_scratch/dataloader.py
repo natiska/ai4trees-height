@@ -33,6 +33,8 @@ class segDataset(Dataset):
         else:
             img = np.array(Image.open(os.path.join(
                 self.data_dir, self.input_folders[0], self.image_list[index])))
+            if (len(img.shape) == 3) and (img.shape[-1] == 4):
+                img = img[:,:,:-1]
         img = img.astype(np.float32)
         mask = np.array(Image.open(os.path.join(self.data_dir, self.output_folder,
                         self.image_list[index])).convert("L"), dtype=np.float32)
