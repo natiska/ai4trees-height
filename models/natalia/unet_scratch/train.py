@@ -137,7 +137,7 @@ def main(config):
                                         config["batch_size"],
                                         shuffle=True)
 
-    model = UNET(in_channels=config["input_channels"],out_channels=1, features=config["features"])
+    model = UNET(in_channels=config["input_channels"],out_channels=1, features=list(config["features"]))
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(),lr=config["learning_rate"])
 
