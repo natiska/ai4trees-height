@@ -12,7 +12,7 @@ class segDataset(Dataset):
         self.input_folders = input_folders
         self.output_folder = output_folder
         assert len(self.input_folders) > 0
-        self.image_list = os.listdir(os.path.join(data_dir, input_folders[0]))
+        self.image_list = os.listdir(os.path.join(data_dir, output_folder))
         self.transform = transform
 
     def __len__(self):
