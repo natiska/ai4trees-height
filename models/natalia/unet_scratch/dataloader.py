@@ -19,12 +19,11 @@ class segDataset(Dataset):
         return len(self.image_list)
 
     def __getitem__(self, index):
-        print(self.image_list[index])
+        #print(self.image_list[index])
         if len(self.input_folders) > 1:
             input_layers = []
             for folder_name in self.input_folders:
                 array = np.array(Image.open(os.path.join(self.data_dir, folder_name, self.image_list[index])))
-                print(array.shape)
                 if len(array.shape) == 2: # convert (256, 256) into (256, 256, 1)
                     prev_shape = array.shape
                     array = array.reshape(array.shape[0], array.shape[1], 1)
