@@ -40,7 +40,6 @@ class segDataset(Dataset):
         else:
             array = np.array(Image.open(os.path.join(
                 self.data_dir, self.input_folders[0], self.image_list[index])))
-            print(array.shape)
             if len(array.shape) == 4:
                 array = array.squeeze()
             if (len(array.shape) == 3) and (4 in list(array.shape)):
