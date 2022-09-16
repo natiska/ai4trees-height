@@ -21,46 +21,35 @@ class segDataset(Dataset):
     def __getitem__(self, index):
         print(self.image_list[index])
         if len(self.input_folders) > 1:
-            print("Line 24")
             input_layers = []
             for folder_name in self.input_folders:
                 array = np.array(Image.open(os.path.join(self.data_dir, folder_name, self.image_list[index])))
                 print(array.shape)
                 if len(array.shape) == 2: # convert (256, 256) into (256, 256, 1)
-                    print("Case A")
                     prev_shape = array.shape
                     array = array.reshape(array.shape[0], array.shape[1], 1)
                 if len(array.shape) == 4: # convert [1, 4, 256, 256] into [4, 256, 256]
-                    print("Case B")
                     array = array.squeeze()
                 if (len(array.shape) == 3) and (4 in list(array.shape)):
                     channel_idx = list(array.shape).index(4)
                     if channel_idx == 0:
-                        print("Case C")
                         array = array[:-1,:,:]
                     else:
-                        print("Case D")
                         array = array[:,:,:-1]
-                print(f"Reshaped to {array.shape}")
                 input_layers.append(array)
             array = np.dstack(input_layers)
         else:
-            print("line 42")
             array = np.array(Image.open(os.path.join(
                 self.data_dir, self.input_folders[0], self.image_list[index])))
             print(array.shape)
             if len(array.shape) == 4:
-                print("Case E")
                 array = array.squeeze()
             if (len(array.shape) == 3) and (4 in list(array.shape)):
                 channel_idx = list(array.shape).index(4)
                 if channel_idx == 0:
-                    print("Case F")
                     array = array[:-1,:,:]
                 else:
-                    print("Case G")
                     array = array[:,:,:-1]
-        print(f"Reshaped to {array.shape}")
         img = array.astype(np.float32)
         mask = np.array(Image.open(os.path.join(self.data_dir, self.output_folder,
                         self.image_list[index])).convert("L"), dtype=np.float32)

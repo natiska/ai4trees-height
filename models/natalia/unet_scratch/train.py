@@ -119,7 +119,7 @@ def save_predictions_as_imgs(loader, model, device, output_folder):
 
 def main(config):
 
-    if config["log_in_wandb"]:
+    if bool(config["log_in_wandb"]) == False:
         os.environ['WANDB_DISABLED'] = 'true'
 
     wandb.init(project="ai4trees_project")
