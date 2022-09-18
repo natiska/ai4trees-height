@@ -115,7 +115,7 @@ def compute_precision_recall_fscore(prediction, ground_truth):
     TP = int((ground_truth == prediction)[ground_truth==1].sum())
     TN = int((ground_truth == prediction)[ground_truth==0].sum())
     FP = int((ground_truth != prediction)[ground_truth==0].sum())
-    FN = int((ground_truth == prediction)[ground_truth==1].sum())
+    FN = int((ground_truth != prediction)[ground_truth==1].sum())
     try:
         precision = np.round(float(TP)/(TP+FP), 2)
     except ZeroDivisionError:
@@ -262,6 +262,9 @@ def main(config):
         save_predictions_as_imgs(test_loader,model,device, config["save_output_path"])
     if bool(config["save_model"]):
         torch.save(model.state_dict(), os.path.join(config["save_output_path"], 'model_weights.pth'))
+        model_artifact = wandb.Artifact(name='model_weights', type='model')
+        model_artifact.add_file(local_path=os.path.join(config["save_output_path"], 'model_weights.pth'))
+        wandb.log_artifact(model_artifact)
 
 if __name__ == '__main__':
 
