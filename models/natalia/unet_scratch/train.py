@@ -19,29 +19,42 @@ def read_yaml(file_path):
     with open(file_path, "r") as f:
         return yaml.safe_load(f)
 
-def make_train_test_transform(img_size):
+def make_train_test_transform(img_size, normalize, mean, std, max_pixel_value):
     
     img_size = tuple(img_size)
     
-    train_transform = A.Compose(
+    if normalize:
+        train_transform = A.Compose(
                 [A.Resize(img_size[0],img_size[1]),
                 A.Rotate(limit=35,p=1.0),
                 A.HorizontalFlip(p=0.5),
                 A.VerticalFlip(p=0.1),
-                #A.Normalize(
-                #    mean=mean,
-                #    std=std,
-                #    max_pixel_value=max_pixel_value
-                #),
+                A.Normalize(
+                    mean=mean,
+                    std=std,
+                    max_pixel_value=max_pixel_value
+                ),
                 ToTensorV2(),
                 ])
-    test_transform = A.Compose(
+        test_transform = A.Compose(
                 [A.Resize(img_size[0],img_size[1]),
-                #A.Normalize(
-                #    mean=mean,
-                #    std=std,
-                #    max_pixel_value=max_pixel_value
-                #),
+                A.Normalize(
+                    mean=mean,
+                    std=std,
+                    max_pixel_value=max_pixel_value
+                ),
+                ToTensorV2(),
+                ])
+    else:
+        train_transform = A.Compose(
+                [A.Resize(img_size[0],img_size[1]),
+                A.Rotate(limit=35,p=1.0),
+                A.HorizontalFlip(p=0.5),
+                A.VerticalFlip(p=0.1),
+                ToTensorV2(),
+                ])
+        test_transform = A.Compose(
+                [A.Resize(img_size[0],img_size[1]),
                 ToTensorV2(),
                 ])
     return train_transform, test_transform
@@ -208,7 +221,8 @@ def main(config):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print("Device: ", device)
 
-    train_transform, test_transform = make_train_test_transform(config["img_size"])
+    train_transform, test_transform = make_train_test_transform(config["img_size"], bool(config["normalize"]), 
+                                                                list(config["mean"]), list(config["std"]), config["max_pixel_value"])
 
     train_loader, valid_loader, test_loader=get_loader(config["data_dir"],
                                         list(config["input_folders"]),
