@@ -160,26 +160,31 @@ def save_predictions_as_imgs(loader, model, device, output_folder):
             preds = (preds > 0.5).float()
         save_image(preds, f"{predictions_folder}/pred_{fname[0].split('.')[0]}.png")
 
-def log_preds_in_wandb(filename, img, mask, predicted_mask):
+def log_preds_in_wandb(filenames, imgs, masks, predicted_masks):
         class_labels = {0: "no-tree", 1: "tree"}
-        if img.shape[1] == 4: # the 4-th channel is height and we want to visualize it separately
-            DSM = img[:,3,:,:]
-            img = img[:,:3,:,:]
+        if imgs.shape[1] == 4: # the 4-th channel is height and we want to visualize it separately
+            DSMs = imgs[:,3,:,:]
+            imgs = imgs[:,:3,:,:]
         else:
-            DSM = None
-        true_mask_array = np.squeeze(np.array(mask))
-        pred_mask_array = np.squeeze(np.array(predicted_mask))
-        RGB_image_with_masks = wandb.Image(img, masks={"predictions" : {
-                                                    "mask_data" : pred_mask_array,
-                                                    "class_labels" : class_labels},
-                                                "ground_truth" : {
-                                                    "mask_data" : true_mask_array,
-                                                    "class_labels" : class_labels}})
-        if DSM is None:
-            wandb.log({filename[0]: RGB_image_with_masks})
-        else:
-            DSM_image = wandb.Image(DSM)
-            wandb.log({filename[0]: [RGB_image_with_masks, DSM_image]})
+            DSMs = None
+        for i in range(masks.shape[0]): # iterating over the batch
+            try:
+                masks_dict = {"predictions" : {
+                                "mask_data" : predicted_masks[i,:,:].squeeze().detach().cpu().clone().numpy(),
+                                "class_labels" : class_labels},
+                            "ground_truth" : {
+                                "mask_data" : masks[i,:,:].squeeze().detach().cpu().clone().numpy(),
+                                "class_labels" : class_labels}}
+                RGB_image_with_masks = wandb.Image(imgs[i,:,:,:].detach().cpu().clone().numpy().swapaxes(0,2), \
+                                                    masks=masks_dict)
+                if DSMs is None:
+                    wandb.log({filenames[i]: RGB_image_with_masks})
+                else:
+                    DSM_image = wandb.Image(DSMs[i,:,:].squeeze().detach().cpu().clone().numpy())
+                    wandb.log({filenames[i]: [RGB_image_with_masks, DSM_image]})
+            except:
+                raise
+                #print("Failed to send the images to WandB. Error")
 
 def main(config):
 
