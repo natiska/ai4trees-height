@@ -87,22 +87,22 @@ def train_one_epoch(train_loader, model, optimizer,loss_fn,device):
         loop.set_postfix(loss=loss.item())
         
     epoch_tloss=running_tloss/len(train_loader)
-    return epoch_tloss
+    return np.round(epoch_tloss,3)
 
 def compute_accuracy(prediction, ground_truth):
     assert prediction.shape == ground_truth.shape
-    prediction = np.array(prediction)
-    ground_truth = np.array(ground_truth)
-    accuracy = np.round((prediction == ground_truth).sum()/prediction.size, 2)*100
+    dims = list(prediction.shape)
+    size = 1
+    for dim in dims:
+      size *= dim
+    accuracy = np.round(float((prediction == ground_truth).sum())/size, 2)*100
     return accuracy
 
 def compute_precision_recall_fscore(prediction, ground_truth):
-    prediction = np.array(prediction)
-    ground_truth = np.array(ground_truth)
-    TP = (ground_truth == prediction)[ground_truth==1].sum()
-    TN = (ground_truth == prediction)[ground_truth==0].sum()
-    FP = (ground_truth != prediction)[ground_truth==0].sum()
-    FN = (ground_truth == prediction)[ground_truth==1].sum()
+    TP = int((ground_truth == prediction)[ground_truth==1].sum())
+    TN = int((ground_truth == prediction)[ground_truth==0].sum())
+    FP = int((ground_truth != prediction)[ground_truth==0].sum())
+    FN = int((ground_truth == prediction)[ground_truth==1].sum())
     precision = float(TP)/(TP+FP)
     recall = float(TP)/(TP+FN)
     fscore = (2 * precision * recall)/(precision + recall)
@@ -143,9 +143,9 @@ def evaluate(test_loader,model,loss_fn,device, send_to_wandb):
         epoch_recall = np.round(overall_recall/len(test_loader),2)
         epoch_fscore = np.round(overall_fscore/len(test_loader),2)
         epoch_dice_score=dice_score/len(test_loader)
-        epoch_vloss=running_vloss/len(test_loader)
+        epoch_vloss=np.round(running_vloss/len(test_loader),2)
     model.train()
-    return epoch_dice_score.item(),epoch_vloss, epoch_accuracy, epoch_precision, epoch_recall, epoch_fscore
+    return np.round(epoch_dice_score.item(),2),epoch_vloss, epoch_accuracy, epoch_precision, epoch_recall, epoch_fscore
             
 def save_predictions_as_imgs(loader, model, device, output_folder):
     model.eval()
