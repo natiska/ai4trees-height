@@ -103,10 +103,19 @@ def compute_precision_recall_fscore(prediction, ground_truth):
     TN = int((ground_truth == prediction)[ground_truth==0].sum())
     FP = int((ground_truth != prediction)[ground_truth==0].sum())
     FN = int((ground_truth == prediction)[ground_truth==1].sum())
-    precision = float(TP)/(TP+FP)
-    recall = float(TP)/(TP+FN)
-    fscore = (2 * precision * recall)/(precision + recall)
-    return np.round(precision,2), np.round(recall,2), np.round(fscore,2)
+    try:
+        precision = np.round(float(TP)/(TP+FP), 2)
+    except ZeroDivisionError:
+        precision = np.nan
+    try:
+        recall = np.round(float(TP)/(TP+FN), 2)
+    except ZeroDivisionError:
+        recall = np.nan
+    try:
+        fscore = np.round((2 * precision * recall)/(precision + recall), 2)
+    except:
+        fscore = np.nan
+    return precision, recall, fscore
 
 def evaluate(test_loader,model,loss_fn,device, send_to_wandb):
     dice_score = 0.0
